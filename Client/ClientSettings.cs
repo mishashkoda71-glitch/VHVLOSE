@@ -27,11 +27,18 @@ internal sealed class ClientSettings
         if (directory is null || !Directory.Exists(directory))
             return [];
 
-        return Directory.GetFiles(directory, "*.vhv")
-            .Select(Path.GetFileNameWithoutExtension)
-            .OfType<string>()
-            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
-            .ToArray();
+        try
+        {
+            return Directory.GetFiles(directory, "*.vhv")
+                .Select(Path.GetFileNameWithoutExtension)
+                .OfType<string>()
+                .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return [];
+        }
     }
 
     public static ClientSettings Load(string profileName = "Default")
