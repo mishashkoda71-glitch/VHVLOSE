@@ -16,24 +16,29 @@ internal static class Program
 
         while (true)
         {
-            if (Process.GetProcessesByName(TargetProcessName).Length > 0)
+            Process? game = Process.GetProcessesByName(TargetProcessName).FirstOrDefault();
+            if (game is not null)
             {
                 Console.WriteLine("[+] Counter-Strike 2 detected");
-                Console.WriteLine("[+] VHVLOSE companion client is ready");
-                Console.WriteLine();
-
+                string? gameRoot = FindGameRoot(game);
                 string? clientPath = FindClientExecutable();
-                if (clientPath is not null)
+
+                if (clientPath is not null && gameRoot is not null)
                 {
-                    Process.Start(new ProcessStartInfo(clientPath) { UseShellExecute = true });
+                    var startInfo = new ProcessStartInfo(clientPath) { UseShellExecute = true };
+                    startInfo.ArgumentList.Add("--game-root");
+                    startInfo.ArgumentList.Add(gameRoot);
+                    Process.Start(startInfo);
+
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("      VHVLOSE CLIENT OPENED");
+                    Console.WriteLine("[+] VHVLOSE companion client opened");
+                    Console.WriteLine($"[+] Config directory: {Path.Combine(gameRoot, "VHVLOSE", "configs")}");
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("      VHVLOSE CLIENT READY");
-                    Console.WriteLine("[!] Client executable not found. Build the Client project first.");
+                    Console.WriteLine("[!] Could not locate the client or CS2 installation folder.");
+                    Console.WriteLine("[!] Build the Client project and launch again.");
                 }
 
                 Console.ResetColor();
@@ -43,6 +48,26 @@ internal static class Program
             }
 
             await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
+    private static string? FindGameRoot(Process game)
+    {
+        try
+        {
+            string? executable = game.MainModule?.FileName;
+            if (string.IsNullOrWhiteSpace(executable))
+                return null;
+
+            var directory = new DirectoryInfo(Path.GetDirectoryName(executable)!);
+            // CS2 is normally installed under: <game root>\\game\\bin\\win64\\cs2.exe
+            return directory.Parent?.Parent?.Parent?.FullName;
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception
+                                   or InvalidOperationException
+                                   or UnauthorizedAccessException)
+        {
+            return null;
         }
     }
 
