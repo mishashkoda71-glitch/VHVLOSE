@@ -1,20 +1,20 @@
 # VHVLOSE
 
-VHVLOSE is a Windows companion launcher and client UI prototype for Counter-Strike 2.
+VHVLOSE is a Windows companion launcher and standalone client UI prototype for Counter-Strike 2.
 
 ## Current scope
 
 - Waits for the Counter-Strike 2 process (`cs2.exe`) to start.
 - Displays clear launcher status in the console.
-- Starts a standalone VHVLOSE client-ready state when the game is detected.
+- Opens the standalone VHVLOSE desktop client when its executable is available.
 - Keeps the client UI and configuration separate from the launcher.
 
-> This starter project does not inject code into CS2, modify the game, read game memory, or bypass anti-cheat. The status message means the companion client is ready.
+> This project does not inject code into CS2, modify the game, read game memory, or bypass anti-cheat. The launcher status indicates that the companion client is ready.
 
 ## Project layout
 
 - `Launcher/` — .NET console launcher.
-- `Client/` — reserved for a standalone client UI prototype.
+- `Client/` — Windows Forms desktop client UI.
 - `Assets/` — images, icons, and other project resources.
 - `Documentation/` — design and development notes.
 
@@ -22,9 +22,14 @@ VHVLOSE is a Windows companion launcher and client UI prototype for Counter-Stri
 
 Requires the .NET 8 SDK on Windows.
 
+From the repository root, build both projects:
+
 ```powershell
-dotnet build .\Launcher\VHVLOSE.Launcher.csproj
-dotnet run --project .\Launcher\VHVLOSE.Launcher.csproj
+dotnet build .\Client\VHVLOSE.Client.csproj -c Release
+dotnet build .\Launcher\VHVLOSE.Launcher.csproj -c Release
+dotnet run --project .\Launcher\VHVLOSE.Launcher.csproj -c Release
 ```
 
-The launcher waits until `cs2.exe` is detected, then prints `VHVLOSE CLIENT READY`.
+Keep the repository folder structure intact. When CS2 is detected, the launcher looks for the Release client executable and opens it. If it is not found, build the Client project first.
+
+See [Documentation/UI.md](Documentation/UI.md) and [Documentation/ROADMAP.md](Documentation/ROADMAP.md).
