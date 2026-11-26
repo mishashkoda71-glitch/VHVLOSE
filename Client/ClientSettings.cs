@@ -29,9 +29,9 @@ internal sealed class ClientSettings
 
         return Directory.GetFiles(directory, "*.vhv")
             .Select(Path.GetFileNameWithoutExtension)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .OfType<string>()
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
-            .ToArray()!;
+            .ToArray();
     }
 
     public static ClientSettings Load(string profileName = "Default")
