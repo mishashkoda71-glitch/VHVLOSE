@@ -7,14 +7,18 @@
 - [ ] Add graceful shutdown and clearer error handling.
 
 ## Phase 2 — Standalone client UI
-- [ ] Create a VHVLOSE-themed desktop window.
-- [ ] Add navigation: HOME, VISUALS (prototype/demo only), MISC, CONFIG.
-- [ ] Add theme and profile settings.
+- [x] Create a VHVLOSE-themed desktop window.
+- [x] Add navigation: HOME, AIM, VISUALS, MISC, CONFIG.
+- [x] Add active navigation state and hover feedback.
+- [x] Save and load a local client profile name.
+- [ ] Add editable visual theme preferences.
+- [ ] Add import/export for client-only settings.
 
 ## Phase 3 — Quality
-- [ ] Add automated build checks.
+- [ ] Add automated Windows build checks.
 - [ ] Add version information and release notes.
-- [ ] Document Windows setup.
+- [x] Document Windows setup.
+- [ ] Test the launcher and client on Windows.
 
 ## Boundaries
-The project remains a standalone companion/prototype. It will not inject code into CS2, manipulate game memory, evade anti-cheat, or provide unfair gameplay automation.
+The project remains a standalone companion/prototype. It will not inject code into CS2, manipulate game memory, render an in-game overlay, evade anti-cheat, or provide unfair gameplay automation.
