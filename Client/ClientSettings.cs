@@ -21,11 +21,24 @@ internal sealed class ClientSettings
         return gameRoot is null ? null : Path.Combine(gameRoot, "VHVLOSE", "configs");
     }
 
+    public static IReadOnlyList<string> ListProfiles()
+    {
+        string? directory = GetConfigDirectory();
+        if (directory is null || !Directory.Exists(directory))
+            return [];
+
+        return Directory.GetFiles(directory, "*.vhv")
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToArray()!;
+    }
+
     public static ClientSettings Load(string profileName = "Default")
     {
         string? directory = GetConfigDirectory();
         if (directory is null)
-            return new ClientSettings();
+            return new ClientSettings { ProfileName = profileName };
 
         string path = GetProfilePath(directory, profileName);
         try
