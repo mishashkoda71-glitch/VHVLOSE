@@ -98,7 +98,7 @@ internal sealed class MainForm : Form
         if (page == "HOME")
         {
             AddCard("WELCOME TO VHVLOSE", "Your desktop companion is running.", 28, 92);
-            AddCard("GAME STATUS", "The launcher can detect CS2. This client does not inject into, read, or modify the game.", 28, 210);
+            AddCard("GAME STATUS", "The launcher detects CS2 and passes its installation folder to this client. No game files are modified.", 28, 210);
             AddCard("BUILD", "Early UI preview • Version 0.1.0", 28, 328);
             return;
         }
@@ -122,20 +122,44 @@ internal sealed class MainForm : Form
 
     private void BuildConfigPage()
     {
-        AddCard("LOCAL PROFILE", "Save a name for this desktop client's local configuration.", 28, 92);
+        string? configDirectory = ClientSettings.GetConfigDirectory();
+        AddCard("CONFIGURATION PROFILES", "Create, save, and select VHVLOSE profiles in the game's installation folder.", 28, 92);
 
-        var profileLabel = new Label
+        var listLabel = new Label
+        {
+            Text = "SAVED PROFILES",
+            ForeColor = MutedColor,
+            AutoSize = true,
+            Location = new Point(48, 210),
+            Font = new Font("Segoe UI", 9, FontStyle.Bold)
+        };
+        var profileList = new ComboBox
+        {
+            Location = new Point(48, 238),
+            Size = new Size(360, 34),
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            BackColor = PanelColor,
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat
+        };
+        foreach (string profile in ClientSettings.ListProfiles())
+            profileList.Items.Add(profile);
+        if (profileList.Items.Count == 0)
+            profileList.Items.Add("Default");
+        profileList.SelectedIndex = 0;
+
+        var nameLabel = new Label
         {
             Text = "PROFILE NAME",
             ForeColor = MutedColor,
             AutoSize = true,
-            Location = new Point(48, 220),
+            Location = new Point(48, 290),
             Font = new Font("Segoe UI", 9, FontStyle.Bold)
         };
         var profileInput = new TextBox
         {
-            Text = ClientSettings.Load().ProfileName,
-            Location = new Point(48, 250),
+            Text = profileList.SelectedItem?.ToString() ?? "Default",
+            Location = new Point(48, 318),
             Size = new Size(360, 34),
             BackColor = PanelColor,
             ForeColor = Color.White,
@@ -144,16 +168,40 @@ internal sealed class MainForm : Form
         };
         var status = new Label
         {
-            Text = "Settings are stored locally in your Windows user profile.",
+            Text = configDirectory is null
+                ? "Launch VHVLOSE from its launcher while CS2 is running to locate the game folder."
+                : "Profiles are stored in the CS2 installation folder.",
             ForeColor = MutedColor,
-            AutoSize = true,
-            Location = new Point(48, 370)
+            AutoSize = false,
+            Location = new Point(48, 414),
+            Size = new Size(620, 42)
+        };
+
+        var loadButton = new Button
+        {
+            Text = "LOAD",
+            Location = new Point(420, 236),
+            Size = new Size(110, 38),
+            BackColor = PanelColor,
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        loadButton.FlatAppearance.BorderColor = AccentColor;
+        loadButton.Click += (_, _) =>
+        {
+            if (profileList.SelectedItem is string selected)
+            {
+                profileInput.Text = ClientSettings.Load(selected).ProfileName;
+                status.ForeColor = Color.LightGreen;
+                status.Text = $"Selected profile: {selected}";
+            }
         };
 
         var saveButton = new Button
         {
             Text = "SAVE PROFILE",
-            Location = new Point(48, 310),
+            Location = new Point(48, 366),
             Size = new Size(150, 40),
             BackColor = AccentColor,
             ForeColor = Color.White,
@@ -164,31 +212,45 @@ internal sealed class MainForm : Form
         saveButton.Click += (_, _) =>
         {
             string name = profileInput.Text.Trim();
-            if (name.Length == 0 || name.Length > 32)
+            if (name.Length == 0 || name.Length > 32 ||
+                name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             {
                 status.ForeColor = Color.Orange;
-                status.Text = "Enter a profile name (1–32 characters).";
+                status.Text = "Use a profile name of 1–32 characters without filename symbols.";
                 return;
             }
 
             try
             {
-                new ClientSettings { ProfileName = name }.Save();
+                string savedPath = new ClientSettings { ProfileName = name }.Save();
+                if (!profileList.Items.Contains(name))
+                    profileList.Items.Add(name);
+                profileList.SelectedItem = name;
                 status.ForeColor = Color.LightGreen;
-                status.Text = "Profile saved on this computer.";
+                status.Text = $"Saved: {savedPath}";
+            }
+            catch (UnauthorizedAccessException)
+            {
+                status.ForeColor = Color.Orange;
+                status.Text = "Windows denied access. The CS2 folder may require administrator permission.";
             }
             catch (Exception)
             {
                 status.ForeColor = Color.Orange;
-                status.Text = "Could not save the profile. Check folder permissions.";
+                status.Text = "Could not save. Start the client from the launcher while CS2 is running.";
             }
         };
 
-        content.Controls.Add(profileLabel);
+        content.Controls.Add(listLabel);
+        content.Controls.Add(profileList);
+        content.Controls.Add(nameLabel);
         content.Controls.Add(profileInput);
+        content.Controls.Add(loadButton);
         content.Controls.Add(saveButton);
         content.Controls.Add(status);
-        AddCard("STORAGE", "Only the profile name is saved. No CS2 data or game settings are accessed.", 28, 430);
+
+        string locationText = configDirectory ?? "CS2 folder not detected";
+        AddCard("CONFIG FOLDER", locationText, 28, 470);
     }
 
     private void AddCard(string heading, string body, int x, int y)
