@@ -103,16 +103,92 @@ internal sealed class MainForm : Form
             return;
         }
 
+        if (page == "CONFIG")
+        {
+            BuildConfigPage();
+            return;
+        }
+
         string description = page switch
         {
             "AIM" => "This page is a visual placeholder for offline UI demonstrations. It does not control aiming or gameplay.",
             "VISUALS" => "Theme and interface preview settings only. No game overlay is attached.",
             "MISC" => "General desktop-client preferences will be added here.",
-            "CONFIG" => "Local interface profiles and settings export are planned for a later milestone.",
             _ => "This section is under construction."
         };
         AddCard(page + " SETTINGS", description, 28, 92);
         AddCard("PROTOTYPE STATUS", "UI preview only — no controls on this page affect CS2.", 28, 210);
+    }
+
+    private void BuildConfigPage()
+    {
+        AddCard("LOCAL PROFILE", "Save a name for this desktop client's local configuration.", 28, 92);
+
+        var profileLabel = new Label
+        {
+            Text = "PROFILE NAME",
+            ForeColor = MutedColor,
+            AutoSize = true,
+            Location = new Point(48, 220),
+            Font = new Font("Segoe UI", 9, FontStyle.Bold)
+        };
+        var profileInput = new TextBox
+        {
+            Text = ClientSettings.Load().ProfileName,
+            Location = new Point(48, 250),
+            Size = new Size(360, 34),
+            BackColor = PanelColor,
+            ForeColor = Color.White,
+            BorderStyle = BorderStyle.FixedSingle,
+            Font = new Font("Segoe UI", 11)
+        };
+        var status = new Label
+        {
+            Text = "Settings are stored locally in your Windows user profile.",
+            ForeColor = MutedColor,
+            AutoSize = true,
+            Location = new Point(48, 370)
+        };
+
+        var saveButton = new Button
+        {
+            Text = "SAVE PROFILE",
+            Location = new Point(48, 310),
+            Size = new Size(150, 40),
+            BackColor = AccentColor,
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        saveButton.FlatAppearance.BorderSize = 0;
+        saveButton.Click += (_, _) =>
+        {
+            string name = profileInput.Text.Trim();
+            if (name.Length == 0 || name.Length > 32)
+            {
+                status.ForeColor = Color.Orange;
+                status.Text = "Enter a profile name (1–32 characters).";
+                return;
+            }
+
+            try
+            {
+                new ClientSettings { ProfileName = name }.Save();
+                status.ForeColor = Color.LightGreen;
+                status.Text = "Profile saved on this computer.";
+            }
+            catch (Exception)
+            {
+                status.ForeColor = Color.Orange;
+                status.Text = "Could not save the profile. Check folder permissions.";
+            }
+        };
+
+        content.Controls.Add(profileLabel);
+        content.Controls.Add(profileInput);
+        content.Controls.Add(saveButton);
+        content.Controls.Add(status);
+        AddCard("STORAGE", "Only the profile name is saved. No CS2 data or game settings are accessed.", 28, 430);
     }
 
     private void AddCard(string heading, string body, int x, int y)
