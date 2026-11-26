@@ -25,6 +25,10 @@ internal sealed class ClientSettings
         {
             return new ClientSettings();
         }
+        catch (UnauthorizedAccessException)
+        {
+            return new ClientSettings();
+        }
         catch (JsonException)
         {
             return new ClientSettings();
