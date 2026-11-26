@@ -1,0 +1,15 @@
+# .NET build output
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+
+# IDE
+.idea/
+.vscode/
+
+# Build artifacts
+*.dll
+*.exe
+*.pdb
