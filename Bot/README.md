@@ -40,13 +40,15 @@ Worker variables in `wrangler.toml`:
 3. In D1 Console, run the contents of `schema.sql`.
 4. Deploy the code in `src/index.ts` as a TypeScript Worker and bind D1 as `DB`.
 5. Add the four secrets above and the two pricing variables.
-6. Copy the deployed Worker URL. Set the Telegram webhook by opening this URL in a browser, replacing placeholders:
+6. Set the Telegram webhook with a POST request. Use the same `WEBHOOK_SECRET` in the URL path and in Telegram's `secret_token` header validation:
 
-```text
-https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<WORKER_SUBDOMAIN>.workers.dev/telegram/<WEBHOOK_SECRET>
+```bash
+curl -X POST "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \\
+  -d "url=https://<WORKER_SUBDOMAIN>.workers.dev/telegram/<WEBHOOK_SECRET>" \\
+  -d "secret_token=<WEBHOOK_SECRET>"
 ```
 
-For production, call `setWebhook` using a POST request with Telegram's `secret_token` option as well, and configure a matching header check in the Worker. Do not share the bot token, webhook secret, or bank-card details publicly.
+Do not share the bot token, webhook secret, or bank-card details publicly.
 
 ## Important limitations
 
