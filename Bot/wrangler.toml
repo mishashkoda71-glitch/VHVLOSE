@@ -1,0 +1,13 @@
+name = "vhvlose-telegram-bot"
+main = "src/index.ts"
+compatibility_date = "2026-11-27"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vhvlose-orders"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[vars]
+PRICE_VERSION = "1.1"
+PRICE_SURCHARGE_RUB = "20"
+CURRENCY_LABEL = "RUB"
