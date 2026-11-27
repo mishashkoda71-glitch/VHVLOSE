@@ -8,7 +8,14 @@ internal sealed class ClientSettings
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     public string ProfileName { get; set; } = "Default";
-    public int FormatVersion { get; set; } = 1;
+    public int FormatVersion { get; set; } = 2;
+
+    // These options belong to the standalone VHVLOSE desktop client only.
+    public string AccentPreset { get; set; } = "Purple";
+    public bool CompactMode { get; set; }
+    public bool ShowNotifications { get; set; } = true;
+    public int PracticeSessionMinutes { get; set; } = 15;
+    public int PracticeTargetCount { get; set; } = 50;
 
     public static void ConfigureGameRoot(string? path)
     {
@@ -54,8 +61,16 @@ internal sealed class ClientSettings
                 return new ClientSettings { ProfileName = profileName };
 
             string json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<ClientSettings>(json) ??
-                   new ClientSettings { ProfileName = profileName };
+            ClientSettings settings = JsonSerializer.Deserialize<ClientSettings>(json) ??
+                                      new ClientSettings { ProfileName = profileName };
+
+            // Clamp values from older or manually edited profiles.
+            settings.PracticeSessionMinutes = Math.Clamp(settings.PracticeSessionMinutes, 1, 120);
+            settings.PracticeTargetCount = Math.Clamp(settings.PracticeTargetCount, 5, 500);
+            if (settings.AccentPreset is not ("Purple" or "Blue" or "Red"))
+                settings.AccentPreset = "Purple";
+
+            return settings;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
         {
