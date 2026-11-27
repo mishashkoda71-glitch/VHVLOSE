@@ -42,6 +42,9 @@ export default {
       return new Response("Not found", { status: 404 });
     }
     if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+    if (request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== env.WEBHOOK_SECRET) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     let update: TelegramUpdate;
     try {
@@ -184,8 +187,8 @@ async function handleCallback(callback: TelegramCallback, env: Env) {
     }
     const amount = priceFor(count, env);
     const insert = await env.DB.prepare(
-      "INSERT INTO orders (order_code, telegram_user_id, chat_id, device_count, amount_rub, price_version, status) VALUES ('PENDING', ?, ?, ?, ?, ?, 'awaiting_sender')"
-    ).bind(String(callback.from.id), String(chatId), count, amount, env.PRICE_VERSION || "1.0").run();
+      "INSERT INTO orders (order_code, telegram_user_id, chat_id, device_count, amount_rub, price_version, status) VALUES (?, ?, ?, ?, ?, ?, 'awaiting_sender')"
+    ).bind("TMP-" + crypto.randomUUID(), String(callback.from.id), String(chatId), count, amount, env.PRICE_VERSION || "1.0").run();
     const id = Number(insert.meta.last_row_id);
     const orderCode = `VHV-${String(id).padStart(4, "0")}`;
     await env.DB.prepare("UPDATE orders SET order_code = ? WHERE id = ?").bind(orderCode, id).run();
