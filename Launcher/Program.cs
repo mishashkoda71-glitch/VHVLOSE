@@ -22,14 +22,12 @@ internal static class Program
                 Console.WriteLine("[+] Counter-Strike 2 detected");
                 string? gameRoot = FindGameRoot(game);
                 string? clientPath = FindClientExecutable();
-
                 if (clientPath is not null && gameRoot is not null)
                 {
                     var startInfo = new ProcessStartInfo(clientPath) { UseShellExecute = true };
                     startInfo.ArgumentList.Add("--game-root");
                     startInfo.ArgumentList.Add(gameRoot);
                     Process.Start(startInfo);
-
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("[+] VHVLOSE companion client opened");
                     Console.WriteLine($"[+] Config directory: {Path.Combine(gameRoot, "VHVLOSE", "configs")}");
@@ -38,15 +36,13 @@ internal static class Program
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("[!] Could not locate the client or CS2 installation folder.");
-                    Console.WriteLine("[!] Build the Client project and launch again.");
+                    Console.WriteLine("[!] Re-run VHVLOSE Setup to repair the installation.");
                 }
-
                 Console.ResetColor();
                 Console.WriteLine();
                 Console.WriteLine("This companion prototype does not inject into or modify the game.");
                 return;
             }
-
             await Task.Delay(TimeSpan.FromSeconds(2));
         }
     }
@@ -56,16 +52,11 @@ internal static class Program
         try
         {
             string? executable = game.MainModule?.FileName;
-            if (string.IsNullOrWhiteSpace(executable))
-                return null;
-
+            if (string.IsNullOrWhiteSpace(executable)) return null;
             var directory = new DirectoryInfo(Path.GetDirectoryName(executable)!);
-            // CS2 is normally installed under: <game root>\\game\\bin\\win64\\cs2.exe
             return directory.Parent?.Parent?.Parent?.FullName;
         }
-        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception
-                                   or InvalidOperationException
-                                   or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or UnauthorizedAccessException)
         {
             return null;
         }
@@ -73,17 +64,16 @@ internal static class Program
 
     private static string? FindClientExecutable()
     {
-        string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-        string[] configurations = ["Release", "Debug"];
+        string installRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
+        string installedClient = Path.Combine(installRoot, "Client", "VHVLOSE.Client.exe");
+        if (File.Exists(installedClient)) return installedClient;
 
-        foreach (string configuration in configurations)
+        string repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        foreach (string configuration in new[] { "Release", "Debug" })
         {
-            string candidate = Path.Combine(root, "Client", "bin", configuration,
-                "net8.0-windows", "VHVLOSE.Client.exe");
-            if (File.Exists(candidate))
-                return candidate;
+            string candidate = Path.Combine(repositoryRoot, "Client", "bin", configuration, "net8.0-windows", "VHVLOSE.Client.exe");
+            if (File.Exists(candidate)) return candidate;
         }
-
         return null;
     }
 
