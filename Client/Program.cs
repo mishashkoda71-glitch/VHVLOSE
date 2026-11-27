@@ -15,8 +15,18 @@ internal static class Program
             }
         }
 
-        ClientSettings.ConfigureGameRoot(gameRoot);
         ApplicationConfiguration.Initialize();
+
+        if (!LicenseConsent.IsCurrentAccepted())
+        {
+            using var license = new LicenseForm();
+            if (license.ShowDialog() != DialogResult.OK)
+                return;
+
+            LicenseConsent.RecordAcceptance();
+        }
+
+        ClientSettings.ConfigureGameRoot(gameRoot);
         Application.Run(new MainForm());
     }
 }
