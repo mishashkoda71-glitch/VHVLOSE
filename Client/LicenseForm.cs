@@ -14,7 +14,7 @@ internal sealed class LicenseForm : Form
 
     public LicenseForm()
     {
-        Text = "VHVLOSE — License agreement";
+        Text = "VHVLOSE — Лицензионное соглашение";
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -26,14 +26,14 @@ internal sealed class LicenseForm : Form
 
         var brandPanel = new Panel { Dock = DockStyle.Left, Width = 245, BackColor = Color.FromArgb(22, 20, 34), Padding = new Padding(25) };
         var brand = new Label { Text = "VHV\nLOSE", AutoSize = true, ForeColor = Accent, Font = new Font("Segoe UI", 27, FontStyle.Bold), Location = new Point(25, 35) };
-        var eyebrow = new Label { Text = "DESKTOP COMPANION", AutoSize = true, ForeColor = Color.FromArgb(195, 180, 226), Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(28, 125) };
+        var eyebrow = new Label { Text = "ДЕСКТОПНЫЙ КЛИЕНТ", AutoSize = true, ForeColor = Color.FromArgb(195, 180, 226), Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(28, 125) };
         var brandLine = new Panel { BackColor = Accent, Location = new Point(28, 160), Size = new Size(48, 3) };
-        var sideCopy = new Label { Text = "A quick read before you\nstep inside.\n\nPlease review the terms\ncarefully. Your choice is\nrecorded on this device.", AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 10), Location = new Point(28, 190) };
-        var version = new Label { Text = "LICENSE  •  VERSION 1.0", AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(28, 590) };
+        var sideCopy = new Label { Text = "Перед началом работы\nознакомьтесь с условиями.\n\nВаш выбор сохраняется\nна этом устройстве.", AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 10), Location = new Point(28, 190) };
+        var version = new Label { Text = "ЛИЦЕНЗИЯ  •  ВЕРСИЯ 1.0", AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(28, 590) };
         brandPanel.Controls.AddRange([brand, eyebrow, brandLine, sideCopy, version]);
 
-        var heading = new Label { Text = "License agreement", AutoSize = true, ForeColor = Color.White, Font = new Font("Segoe UI", 22, FontStyle.Bold), Location = new Point(282, 28) };
-        var subtitle = new Label { Text = "Please read the terms before using VHVLOSE.", AutoSize = true, ForeColor = Muted, Location = new Point(285, 72) };
+        var heading = new Label { Text = "Лицензионное соглашение", AutoSize = true, ForeColor = Color.White, Font = new Font("Segoe UI", 22, FontStyle.Bold), Location = new Point(282, 28) };
+        var subtitle = new Label { Text = "Пожалуйста, ознакомьтесь с условиями перед использованием VHVLOSE.", AutoSize = true, ForeColor = Muted, Location = new Point(285, 72) };
 
         var document = new RichTextBox
         {
@@ -48,39 +48,39 @@ internal sealed class LicenseForm : Form
             DetectUrls = false,
             WordWrap = true,
             Text =
-@"1. ACCEPTANCE
+@"1. ПРИНЯТИЕ УСЛОВИЙ
 
-By selecting “I have read and accept”, you confirm that you have had the opportunity to review these terms. If you do not agree, select “Decline” and close the application.
+By selecting “I have read and accept”, you confirm that you have had the opportunity to review these terms. If you do not agree, select “Отклонить” and close the application.
 
-2. WHAT VHVLOSE IS
+2. ЧТО ТАКОЕ VHVLOSE
 
-VHVLOSE is a standalone desktop companion prototype. Its current features include a launcher, local preferences and profile management, and an offline practice-session planner. It is not an official Valve or Counter-Strike product and is not affiliated with or endorsed by Valve.
+VHVLOSE — самостоятельное настольное приложение-компаньон. В текущую версию входят лаунчер, локальные настройки, управление профилями и планировщик офлайн-тренировок. Программа не является официальным продуктом Valve или Counter-Strike и не связана с Valve.
 
-3. PERMITTED USE AND GAME INTEGRATION
+3. ИСПОЛЬЗОВАНИЕ И ВЗАИМОДЕЙСТВИЕ С ИГРОЙ
 
-The current project does not inject code into Counter-Strike 2, modify game files, read or change game memory, provide in-game overlays or aim assistance, or bypass anti-cheat systems. Do not use the application to violate the rules or terms of services you use.
+Текущая версия проекта не внедряет код в Counter-Strike 2, не изменяет файлы игры, не читает и не меняет память игры, не создаёт внутриигровые оверлеи и помощь в прицеливании и не обходит античит. Не используйте приложение для нарушения правил игр и сервисов.
 
-4. DISCLAIMER
+4. ОТКАЗ ОТ ГАРАНТИЙ И ОТВЕТСТВЕННОСТИ
 
-The application is provided “as is” and “as available”. To the extent permitted by applicable law, the developers make no warranty that the application will be uninterrupted, error-free, or suitable for a particular purpose. To the extent permitted by law, the developers are not liable for indirect or consequential loss arising from use of the application. Nothing in these terms excludes liability or consumer rights that cannot legally be excluded.
+Приложение предоставляется «как есть» и «по мере доступности». В пределах, разрешённых применимым законодательством, разработчики не гарантируют бесперебойную или безошибочную работу и пригодность приложения для конкретной цели. В пределах, разрешённых законом, разработчики не отвечают за косвенные или последующие убытки, связанные с использованием приложения. Ничто в этом соглашении не ограничивает права потребителя и ответственность, которые нельзя ограничить по закону.
 
-5. SUPPORT
+5. ТЕХНИЧЕСКАЯ ПОДДЕРЖКА
 
-Before contacting the VHVLOSE support team through Telegram or another channel, please read this agreement and the project instructions. Support may refer you back to the relevant documentation and may decline to provide individual assistance where the answer is already clearly covered by the published terms or instructions. This does not affect any mandatory legal rights.
+Перед обращением в поддержку VHVLOSE через Telegram или другой канал внимательно прочитайте это соглашение и инструкции проекта. Если ответ уже содержится в опубликованных условиях или документации, поддержка может направить вас к соответствующему разделу и не предоставлять отдельную консультацию по этому вопросу. Это не ограничивает обязательные права пользователя, предусмотренные законом.
 
-6. UPDATES AND CHANGES
+6. ОБНОВЛЕНИЯ И ИЗМЕНЕНИЯ
 
-The application and these terms may change as the project develops. If the license version changes, you will be asked to review and accept the updated terms before continuing.
+По мере развития проекта приложение и условия могут обновляться. При изменении версии лицензии вам будет предложено ознакомиться с новой редакцией и принять её до продолжения работы.
 
-7. YOUR CHOICE
+7. ВАШ ВЫБОР
 
-You may decline these terms and close the application at any time. Acceptance is stored locally on this Windows account so that this screen does not need to appear on every launch. You can contact the project maintainers if you have questions about these terms."
+Вы можете отказаться от условий и закрыть приложение в любой момент. Согласие сохраняется локально для этой учётной записи Windows, поэтому при каждом запуске повторно принимать ту же редакцию не потребуется. По вопросам об условиях можно обратиться к разработчикам проекта."
         };
 
         var divider = new Panel { BackColor = Color.FromArgb(49, 51, 67), Location = new Point(282, 520), Size = new Size(580, 1) };
         acceptCheck = new CheckBox
         {
-            Text = "I have read and accept the license agreement",
+            Text = "Я прочитал(а) и принимаю лицензионное соглашение",
             AutoSize = true,
             ForeColor = Color.FromArgb(222, 223, 233),
             Location = new Point(284, 540),
@@ -88,7 +88,7 @@ You may decline these terms and close the application at any time. Acceptance is
         };
         acceptButton = new Button
         {
-            Text = "Accept and continue",
+            Text = "Принять и продолжить",
             Location = new Point(675, 580),
             Size = new Size(187, 42),
             BackColor = Accent,
