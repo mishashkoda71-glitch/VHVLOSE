@@ -82,3 +82,10 @@ dotnet build .\\Launcher\\VHVLOSE.Launcher.csproj -c Release
 If Windows denies write access to the CS2 installation folder (common for installations under `C:\\Program Files`), the client reports the permission issue; it does not change folder permissions.
 
 See [Documentation/UI.md](Documentation/UI.md) and [Documentation/ROADMAP.md](Documentation/ROADMAP.md).
+
+
+## Telegram order bot (new prototype)
+
+The `Bot/` folder contains a Cloudflare Worker + D1 implementation for the agreed manual-payment order flow. Buyers choose 1–5 devices, receive an order number, amount, and configured bank transfer details, then submit the sender name shown by their bank. Only after the sender name is submitted does the order appear in the admin-only `/check` list. The admin verifies the incoming transfer in their banking app and confirms or cancels the order from Telegram.
+
+See [Bot/README.md](Bot/README.md) for deployment and secret configuration. The bot is source code only at this stage: it is not deployed or connected to a Telegram bot yet. Its generated license keys are not yet integrated with the Windows client's activation verifier, so do not sell or distribute them as working desktop activations until that integration is completed. Never commit a Telegram token, admin ID, webhook secret, or bank-card details.
