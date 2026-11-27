@@ -4,304 +4,256 @@ namespace VHVLOSE.Client;
 
 internal sealed class MainForm : Form
 {
-    private static readonly Color BackgroundColor = Color.FromArgb(13, 14, 20);
-    private static readonly Color PanelColor = Color.FromArgb(22, 24, 34);
-    private static readonly Color MutedColor = Color.FromArgb(135, 137, 153);
+    private static readonly Color Background = Color.FromArgb(13, 14, 21);
+    private static readonly Color Surface = Color.FromArgb(22, 24, 35);
+    private static readonly Color SurfaceRaised = Color.FromArgb(29, 31, 44);
+    private static readonly Color Muted = Color.FromArgb(145, 148, 166);
+    private Color accent = Color.FromArgb(153, 104, 255);
 
-    private Color accentColor = Color.FromArgb(151, 93, 255);
-    private readonly Panel content = new() { Dock = DockStyle.Fill, BackColor = BackgroundColor };
-    private readonly List<Button> navigationButtons = [];
-    private ClientSettings currentSettings = new();
-
-    private readonly Label pageTitle = new()
-    {
-        AutoSize = true,
-        ForeColor = Color.White,
-        Font = new Font("Segoe UI", 19, FontStyle.Bold),
-        Location = new Point(28, 24),
-        Text = "HOME"
-    };
+    private readonly Panel content = new() { Dock = DockStyle.Fill, BackColor = Background, Padding = new Padding(30, 24, 30, 24) };
+    private readonly Panel sidebar = new() { Dock = DockStyle.Left, Width = 205, BackColor = Surface };
+    private readonly Panel topbar = new() { Dock = DockStyle.Top, Height = 66, BackColor = Color.FromArgb(17, 18, 27) };
+    private readonly Label pageTitle = new() { AutoSize = true, ForeColor = Color.White, Font = new Font("Segoe UI", 19, FontStyle.Bold), Location = new Point(0, 0) };
+    private readonly Label pageSubtitle = new() { AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 9), Location = new Point(2, 39) };
+    private readonly Label brand = new() { AutoSize = true, Text = "VHVLOSE", Font = new Font("Segoe UI", 21, FontStyle.Bold), Location = new Point(22, 23) };
+    private readonly List<Button> navButtons = [];
+    private ClientSettings settings = new();
 
     public MainForm()
     {
         Text = "VHVLOSE";
         StartPosition = FormStartPosition.CenterScreen;
-        MinimumSize = new Size(820, 560);
-        Size = new Size(1000, 680);
-        BackColor = BackgroundColor;
+        MinimumSize = new Size(900, 620);
+        Size = new Size(1120, 740);
+        BackColor = Background;
         ForeColor = Color.White;
-        Font = new Font("Segoe UI", 10);
+        Font = new Font("Segoe UI", 9.5f);
+        DoubleBuffered = true;
 
-        currentSettings = ClientSettings.Load();
+        settings = ClientSettings.Load();
         ApplyAccent();
+        BuildSidebar();
+        BuildTopbar();
 
-        var sidebar = new Panel { Dock = DockStyle.Left, Width = 190, BackColor = PanelColor };
-        var brand = new Label
-        {
-            Text = "VHVLOSE",
-            ForeColor = accentColor,
-            Font = new Font("Segoe UI", 20, FontStyle.Bold),
-            AutoSize = true,
-            Location = new Point(22, 24)
-        };
+        content.Controls.Add(pageTitle);
+        content.Controls.Add(pageSubtitle);
+        Controls.Add(content);
+        Controls.Add(topbar);
+        Controls.Add(sidebar);
+        ShowPage("HOME");
+    }
+
+    private void BuildSidebar()
+    {
+        brand.ForeColor = accent;
         sidebar.Controls.Add(brand);
+        var sub = new Label { Text = "DESKTOP COMPANION", AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 7.5f, FontStyle.Bold), Location = new Point(25, 58) };
+        sidebar.Controls.Add(sub);
+        var line = new Panel { BackColor = Color.FromArgb(48, 49, 66), Location = new Point(20, 91), Size = new Size(165, 1) };
+        sidebar.Controls.Add(line);
 
         string[] pages = ["HOME", "AIM", "VISUALS", "MISC", "CONFIG"];
+        string[] labels = ["⌂   Overview", "◎   Practice", "◈   Appearance", "⚙   Preferences", "▤   Profiles"];
         for (int i = 0; i < pages.Length; i++)
         {
             string page = pages[i];
             var button = new Button
             {
-                Text = page,
-                Tag = page,
-                Location = new Point(14, 92 + i * 52),
-                Size = new Size(162, 42),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = PanelColor,
-                ForeColor = Color.White,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(14, 0, 0, 0),
-                Cursor = Cursors.Hand
+                Text = labels[i], Tag = page, Location = new Point(13, 116 + i * 51),
+                Size = new Size(179, 42), FlatStyle = FlatStyle.Flat,
+                BackColor = Surface, ForeColor = Color.FromArgb(205, 207, 220),
+                TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(13, 0, 0, 0),
+                Font = new Font("Segoe UI", 9.5f), Cursor = Cursors.Hand
             };
             button.FlatAppearance.BorderSize = 0;
-            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(39, 34, 54);
+            button.FlatAppearance.MouseOverBackColor = SurfaceRaised;
             button.Click += (_, _) => ShowPage(page);
-            navigationButtons.Add(button);
+            navButtons.Add(button);
             sidebar.Controls.Add(button);
         }
 
-        var footer = new Label
-        {
-            Text = "DESKTOP CLIENT • 0.2.0",
-            ForeColor = MutedColor,
-            AutoSize = true,
-            Location = new Point(22, 0),
-            Anchor = AnchorStyles.Left | AnchorStyles.Bottom
-        };
+        var bottomLine = new Panel { BackColor = Color.FromArgb(48, 49, 66), Location = new Point(20, 0), Size = new Size(165, 1), Anchor = AnchorStyles.Left | AnchorStyles.Bottom };
+        var footer = new Label { Text = "VHVLOSE  •  BUILD 0.3", AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(22, 0), Anchor = AnchorStyles.Left | AnchorStyles.Bottom };
+        sidebar.Controls.Add(bottomLine);
         sidebar.Controls.Add(footer);
-        sidebar.Resize += (_, _) => footer.Location = new Point(22, sidebar.ClientSize.Height - footer.Height - 22);
+        sidebar.Resize += (_, _) =>
+        {
+            bottomLine.Location = new Point(20, sidebar.ClientSize.Height - 58);
+            footer.Location = new Point(22, sidebar.ClientSize.Height - 40);
+        };
+    }
 
-        content.Controls.Add(pageTitle);
-        Controls.Add(content);
-        Controls.Add(sidebar);
-        ShowPage("HOME");
+    private void BuildTopbar()
+    {
+        var statusDot = new Panel { BackColor = Color.FromArgb(73, 201, 139), Size = new Size(8, 8), Location = new Point(0, 0) };
+        var status = new Label { Text = "CLIENT READY", AutoSize = true, ForeColor = Color.FromArgb(165, 218, 190), Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(14, -4) };
+        var statusWrap = new Panel { Size = new Size(120, 24), Location = new Point(0, 21), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+        statusDot.Location = new Point(0, 4);
+        statusWrap.Controls.Add(statusDot);
+        statusWrap.Controls.Add(status);
+        topbar.Controls.Add(statusWrap);
+        topbar.Resize += (_, _) => statusWrap.Left = topbar.ClientSize.Width - statusWrap.Width - 28;
     }
 
     private void ShowPage(string page)
     {
+        content.SuspendLayout();
         content.Controls.Clear();
-        pageTitle.Text = page;
+        pageTitle.Text = page switch
+        {
+            "HOME" => "Overview",
+            "AIM" => "Practice planner",
+            "VISUALS" => "Appearance",
+            "MISC" => "Preferences",
+            "CONFIG" => "Profiles",
+            _ => page
+        };
+        pageSubtitle.Text = page switch
+        {
+            "HOME" => "Your VHVLOSE workspace at a glance.",
+            "AIM" => "Plan an offline training session.",
+            "VISUALS" => "Personalize the desktop client.",
+            "MISC" => "General application preferences.",
+            "CONFIG" => "Save and load local client profiles.",
+            _ => ""
+        };
         content.Controls.Add(pageTitle);
+        content.Controls.Add(pageSubtitle);
 
-        foreach (var button in navigationButtons)
+        foreach (var button in navButtons)
         {
             bool selected = string.Equals(button.Tag?.ToString(), page, StringComparison.Ordinal);
-            button.BackColor = selected ? accentColor : PanelColor;
-            button.Font = new Font("Segoe UI", 9, selected ? FontStyle.Bold : FontStyle.Regular);
+            button.BackColor = selected ? Color.FromArgb(48, 37, 72) : Surface;
+            button.ForeColor = selected ? Color.White : Color.FromArgb(190, 192, 207);
+            button.Font = new Font("Segoe UI", 9.5f, selected ? FontStyle.Bold : FontStyle.Regular);
+            button.FlatAppearance.BorderColor = selected ? accent : Surface;
+            button.FlatAppearance.BorderSize = selected ? 1 : 0;
         }
 
         switch (page)
         {
             case "HOME":
-                AddCard("WELCOME TO VHVLOSE", "A standalone desktop companion with local preferences and profile management.", 28, 92);
-                AddCard("GAME STATUS", "The launcher can detect CS2 and pass its installation folder to this client. Game files and gameplay are not modified.", 28, 210);
-                AddCard("CURRENT PROFILE", currentSettings.ProfileName, 28, 328);
+                AddHero("WELCOME BACK", "VHVLOSE is ready when you are.", "A clean desktop companion for local preferences and offline practice planning.", 0, 92, 3);
+                AddCard("GAME CONNECTION", "The launcher detects the CS2 process and locates its installation folder. It does not modify game files or gameplay.", 0, 250, 2);
+                AddCard("ACTIVE PROFILE", settings.ProfileName, 0, 370, 2);
                 break;
-
-            case "AIM":
-                BuildPracticePage();
-                break;
-
-            case "VISUALS":
-                BuildVisualsPage();
-                break;
-
-            case "MISC":
-                BuildMiscPage();
-                break;
-
-            case "CONFIG":
-                BuildConfigPage();
-                break;
+            case "AIM": BuildPracticePage(); break;
+            case "VISUALS": BuildVisualsPage(); break;
+            case "MISC": BuildMiscPage(); break;
+            case "CONFIG": BuildConfigPage(); break;
         }
+        content.ResumeLayout();
     }
 
     private void BuildPracticePage()
     {
-        AddCard("OFFLINE PRACTICE PLANNER", "Plan a standalone aim-training session. These values are saved locally and do not control CS2.", 28, 92);
-
-        AddSettingLabel("SESSION LENGTH (MINUTES)", 48, 218);
-        var minutes = new NumericUpDown
-        {
-            Minimum = 1,
-            Maximum = 120,
-            Value = currentSettings.PracticeSessionMinutes,
-            Location = new Point(48, 248),
-            Size = new Size(180, 34),
-            BackColor = PanelColor,
-            ForeColor = Color.White
-        };
-        minutes.ValueChanged += (_, _) => currentSettings.PracticeSessionMinutes = (int)minutes.Value;
+        AddCard("OFFLINE SESSION", "Set up a simple practice plan. These values are stored locally and do not control CS2.", 0, 92, 3, 104);
+        AddSettingLabel("SESSION LENGTH", 22, 228);
+        var minutes = MakeNumber(settings.PracticeSessionMinutes, 1, 120, 22, 256);
+        minutes.ValueChanged += (_, _) => settings.PracticeSessionMinutes = (int)minutes.Value;
         content.Controls.Add(minutes);
-
-        AddSettingLabel("TARGETS PER SESSION", 48, 310);
-        var targets = new NumericUpDown
-        {
-            Minimum = 5,
-            Maximum = 500,
-            Increment = 5,
-            Value = currentSettings.PracticeTargetCount,
-            Location = new Point(48, 340),
-            Size = new Size(180, 34),
-            BackColor = PanelColor,
-            ForeColor = Color.White
-        };
-        targets.ValueChanged += (_, _) => currentSettings.PracticeTargetCount = (int)targets.Value;
+        AddSettingLabel("TARGET COUNT", 250, 228);
+        var targets = MakeNumber(settings.PracticeTargetCount, 5, 500, 250, 256);
+        targets.Increment = 5;
+        targets.ValueChanged += (_, _) => settings.PracticeTargetCount = (int)targets.Value;
         content.Controls.Add(targets);
-
-        AddCard("SCOPE", "This page is a practice-session planner only. It does not provide aim assistance or interact with a game.", 28, 414);
+        AddCard("WHAT THIS DOES", "This is a session planner only. No aim assistance, automation, injection, or interaction with game memory is provided.", 0, 340, 3, 108);
+        AddSaveHint();
     }
+
+    private NumericUpDown MakeNumber(int value, int min, int max, int x, int y) => new()
+    {
+        Minimum = min, Maximum = max, Value = Math.Clamp(value, min, max),
+        Location = new Point(x, y), Size = new Size(190, 38),
+        BackColor = SurfaceRaised, ForeColor = Color.White,
+        BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 11)
+    };
 
     private void BuildVisualsPage()
     {
-        AddCard("CLIENT APPEARANCE", "Customize the VHVLOSE desktop interface. Changes apply to this client only.", 28, 92);
-        AddSettingLabel("ACCENT COLOR", 48, 218);
-
-        var accentPicker = new ComboBox
+        AddCard("COLOR THEME", "Choose the accent color used throughout the VHVLOSE interface.", 0, 92, 3, 104);
+        AddSettingLabel("ACCENT PRESET", 22, 228);
+        var picker = new ComboBox
         {
-            Location = new Point(48, 248),
-            Size = new Size(220, 34),
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            BackColor = PanelColor,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat
+            Location = new Point(22, 256), Size = new Size(230, 38),
+            DropDownStyle = ComboBoxStyle.DropDownList, BackColor = SurfaceRaised,
+            ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10)
         };
-        accentPicker.Items.AddRange(["Purple", "Blue", "Red"]);
-        accentPicker.SelectedItem = currentSettings.AccentPreset;
-        accentPicker.SelectedIndexChanged += (_, _) =>
+        picker.Items.AddRange(["Purple", "Blue", "Red"]);
+        picker.SelectedItem = settings.AccentPreset;
+        picker.SelectedIndexChanged += (_, _) =>
         {
-            currentSettings.AccentPreset = accentPicker.SelectedItem?.ToString() ?? "Purple";
+            settings.AccentPreset = picker.SelectedItem?.ToString() ?? "Purple";
             ApplyAccent();
             ShowPage("VISUALS");
         };
-        content.Controls.Add(accentPicker);
-
-        var compact = new CheckBox
-        {
-            Text = "Compact interface spacing",
-            Checked = currentSettings.CompactMode,
-            AutoSize = true,
-            ForeColor = Color.White,
-            Location = new Point(48, 310)
-        };
-        compact.CheckedChanged += (_, _) => currentSettings.CompactMode = compact.Checked;
+        content.Controls.Add(picker);
+        AddCard("LAYOUT", "Compact spacing preference is saved with your local profile.", 0, 330, 3, 90);
+        var compact = new CheckBox { Text = "Use compact interface spacing", Checked = settings.CompactMode, AutoSize = true, ForeColor = Color.White, Location = new Point(22, 445), Cursor = Cursors.Hand };
+        compact.CheckedChanged += (_, _) => settings.CompactMode = compact.Checked;
         content.Controls.Add(compact);
+        AddSaveHint();
     }
 
     private void BuildMiscPage()
     {
-        AddCard("GENERAL PREFERENCES", "Desktop-client options. No settings on this page alter game behavior.", 28, 92);
-
-        var notifications = new CheckBox
-        {
-            Text = "Show client notifications",
-            Checked = currentSettings.ShowNotifications,
-            AutoSize = true,
-            ForeColor = Color.White,
-            Location = new Point(48, 220)
-        };
-        notifications.CheckedChanged += (_, _) => currentSettings.ShowNotifications = notifications.Checked;
+        AddCard("NOTIFICATIONS", "Choose whether VHVLOSE may show its own desktop notifications.", 0, 92, 3, 104);
+        var notifications = new CheckBox { Text = "Show client notifications", Checked = settings.ShowNotifications, AutoSize = true, ForeColor = Color.White, Location = new Point(22, 228), Cursor = Cursors.Hand };
+        notifications.CheckedChanged += (_, _) => settings.ShowNotifications = notifications.Checked;
         content.Controls.Add(notifications);
-
-        AddCard("ABOUT", "VHVLOSE 0.2.0 • Windows desktop companion • Local profile storage", 28, 286);
+        AddCard("ABOUT VHVLOSE", "Version 0.3  •  Windows desktop companion  •  Local profile storage", 0, 300, 3, 94);
+        AddSaveHint();
     }
 
     private void BuildConfigPage()
     {
-        string? configDirectory = ClientSettings.GetConfigDirectory();
-        AddCard("CONFIGURATION PROFILES", "Save and load VHVLOSE desktop preferences as local .vhv profiles.", 28, 92);
+        string? directory = ClientSettings.GetConfigDirectory();
+        AddCard("PROFILE MANAGER", "Keep separate sets of VHVLOSE desktop preferences in .vhv files.", 0, 92, 3, 104);
+        AddSettingLabel("SAVED PROFILES", 22, 226);
+        var list = new ComboBox { Location = new Point(22, 254), Size = new Size(290, 38), DropDownStyle = ComboBoxStyle.DropDownList, BackColor = SurfaceRaised, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+        foreach (string profile in ClientSettings.ListProfiles()) list.Items.Add(profile);
+        if (list.Items.Count == 0) list.Items.Add("Default");
+        list.SelectedItem = list.Items.Contains(settings.ProfileName) ? settings.ProfileName : list.Items[0];
 
-        AddSettingLabel("SAVED PROFILES", 48, 210);
-        var profileList = new ComboBox
+        AddSettingLabel("PROFILE NAME", 22, 318);
+        var name = new TextBox { Text = list.SelectedItem?.ToString() ?? "Default", Location = new Point(22, 346), Size = new Size(290, 36), BackColor = SurfaceRaised, ForeColor = Color.White, BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 10) };
+        var status = new Label { Text = directory is null ? "Launch VHVLOSE through its launcher while CS2 is running to detect the game folder." : "Profiles are saved in the detected CS2 installation folder.", Location = new Point(22, 454), Size = new Size(680, 42), ForeColor = Muted };
+        var load = MakeActionButton("LOAD PROFILE", 340, 252, SurfaceRaised, 130);
+        load.FlatAppearance.BorderColor = accent;
+        load.Click += (_, _) =>
         {
-            Location = new Point(48, 238),
-            Size = new Size(340, 34),
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            BackColor = PanelColor,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat
-        };
-        foreach (string profile in ClientSettings.ListProfiles())
-            profileList.Items.Add(profile);
-        if (profileList.Items.Count == 0)
-            profileList.Items.Add("Default");
-        profileList.SelectedItem = profileList.Items.Contains(currentSettings.ProfileName)
-            ? currentSettings.ProfileName
-            : profileList.Items[0];
-
-        AddSettingLabel("PROFILE NAME", 48, 290);
-        var profileInput = new TextBox
-        {
-            Text = profileList.SelectedItem?.ToString() ?? "Default",
-            Location = new Point(48, 318),
-            Size = new Size(340, 34),
-            BackColor = PanelColor,
-            ForeColor = Color.White,
-            BorderStyle = BorderStyle.FixedSingle,
-            Font = new Font("Segoe UI", 11)
-        };
-
-        var status = new Label
-        {
-            Text = configDirectory is null
-                ? "Start the launcher while CS2 is running to detect the installation folder."
-                : "Profiles are stored in the CS2 installation folder.",
-            ForeColor = MutedColor,
-            AutoSize = false,
-            Location = new Point(48, 414),
-            Size = new Size(650, 42)
-        };
-
-        var loadButton = CreateButton("LOAD", new Point(402, 236), new Size(110, 38), PanelColor);
-        loadButton.FlatAppearance.BorderColor = accentColor;
-        loadButton.Click += (_, _) =>
-        {
-            if (profileList.SelectedItem is string selected)
+            if (list.SelectedItem is string selected)
             {
-                currentSettings = ClientSettings.Load(selected);
-                profileInput.Text = currentSettings.ProfileName;
+                settings = ClientSettings.Load(selected);
+                name.Text = settings.ProfileName;
                 ApplyAccent();
                 status.ForeColor = Color.LightGreen;
-                status.Text = $"Loaded profile: {selected}. Open another page to see its settings.";
+                status.Text = $"Loaded profile: {selected}.";
             }
         };
-
-        var saveButton = CreateButton("SAVE PROFILE", new Point(48, 366), new Size(150, 40), accentColor);
-        saveButton.Click += (_, _) =>
+        var save = MakeActionButton("SAVE PROFILE", 22, 400, accent, 150);
+        save.Click += (_, _) =>
         {
-            string name = profileInput.Text.Trim();
-            if (name.Length == 0 || name.Length > 32 ||
-                name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            string profile = name.Text.Trim();
+            if (profile.Length == 0 || profile.Length > 32 || profile.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             {
                 status.ForeColor = Color.Orange;
-                status.Text = "Use a profile name of 1–32 characters without filename symbols.";
+                status.Text = "Enter a profile name from 1 to 32 valid characters.";
                 return;
             }
-
             try
             {
-                currentSettings.ProfileName = name;
-                string savedPath = currentSettings.Save();
-                if (!profileList.Items.Contains(name))
-                    profileList.Items.Add(name);
-                profileList.SelectedItem = name;
+                settings.ProfileName = profile;
+                string path = settings.Save();
+                if (!list.Items.Contains(profile)) list.Items.Add(profile);
+                list.SelectedItem = profile;
                 status.ForeColor = Color.LightGreen;
-                status.Text = $"Saved: {savedPath}";
+                status.Text = $"Saved successfully: {path}";
             }
             catch (UnauthorizedAccessException)
             {
                 status.ForeColor = Color.Orange;
-                status.Text = "Windows denied access. The CS2 folder may require administrator permission.";
+                status.Text = "Windows denied access to the selected folder.";
             }
             catch (Exception)
             {
@@ -309,81 +261,64 @@ internal sealed class MainForm : Form
                 status.Text = "Could not save. Start the client from the launcher while CS2 is running.";
             }
         };
+        content.Controls.AddRange([list, name, load, save, status]);
+        AddCard("STORAGE LOCATION", directory ?? "Game folder not detected yet", 0, 520, 3, 80);
+    }
 
-        content.Controls.Add(profileList);
-        content.Controls.Add(profileInput);
-        content.Controls.Add(loadButton);
-        content.Controls.Add(saveButton);
-        content.Controls.Add(status);
-        AddCard("CONFIG FOLDER", configDirectory ?? "CS2 folder not detected", 28, 470);
+    private void AddHero(string eyebrow, string title, string body, int x, int y, int span)
+    {
+        var panel = MakePanel(x, y, span, 136);
+        var tag = new Label { Text = eyebrow, AutoSize = true, ForeColor = accent, Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(22, 17) };
+        var headline = new Label { Text = title, AutoSize = true, ForeColor = Color.White, Font = new Font("Segoe UI", 17, FontStyle.Bold), Location = new Point(22, 42) };
+        var detail = new Label { Text = body, AutoSize = false, ForeColor = Muted, Font = new Font("Segoe UI", 9.5f), Location = new Point(22, 78), Size = new Size(panel.Width - 44, 42), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
+        var accentBar = new Panel { BackColor = accent, Size = new Size(4, 88), Location = new Point(panel.Width - 5, 24), Anchor = AnchorStyles.Top | AnchorStyles.Right };
+        panel.Controls.AddRange([tag, headline, detail, accentBar]);
+        content.Controls.Add(panel);
+    }
+
+    private void AddCard(string heading, string body, int x, int y, int span, int height = 94)
+    {
+        var panel = MakePanel(x, y, span, height);
+        var title = new Label { Text = heading, AutoSize = true, ForeColor = accent, Font = new Font("Segoe UI", 9, FontStyle.Bold), Location = new Point(20, 16) };
+        var detail = new Label { Text = body, AutoSize = false, ForeColor = Color.FromArgb(218, 219, 229), Font = new Font("Segoe UI", 9.5f), Location = new Point(20, 44), Size = new Size(panel.Width - 40, height - 50), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
+        panel.Controls.AddRange([title, detail]);
+        content.Controls.Add(panel);
+    }
+
+    private Panel MakePanel(int x, int y, int span, int height)
+    {
+        int width = Math.Max(420, content.ClientSize.Width - x - 60);
+        var panel = new Panel { Location = new Point(x, y), Size = new Size(width, height), BackColor = Surface, Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
+        return panel;
     }
 
     private void AddSettingLabel(string text, int x, int y)
     {
-        content.Controls.Add(new Label
-        {
-            Text = text,
-            ForeColor = MutedColor,
-            AutoSize = true,
-            Location = new Point(x, y),
-            Font = new Font("Segoe UI", 9, FontStyle.Bold)
-        });
+        content.Controls.Add(new Label { Text = text, AutoSize = true, ForeColor = Muted, Font = new Font("Segoe UI", 8, FontStyle.Bold), Location = new Point(x, y) });
     }
 
-    private Button CreateButton(string text, Point location, Size size, Color background)
+    private Button MakeActionButton(string text, int x, int y, Color color, int width)
     {
-        var button = new Button
-        {
-            Text = text,
-            Location = location,
-            Size = size,
-            BackColor = background,
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand
-        };
+        var button = new Button { Text = text, Location = new Point(x, y), Size = new Size(width, 39), BackColor = color, ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), Cursor = Cursors.Hand };
         button.FlatAppearance.BorderSize = 0;
+        button.FlatAppearance.MouseOverBackColor = ControlPaint.Light(color, .12f);
         return button;
+    }
+
+    private void AddSaveHint()
+    {
+        var hint = new Label { Text = "Changes are kept in memory for this session. Save a profile in the PROFILES section to keep them.", AutoSize = true, ForeColor = Muted, Location = new Point(2, 540), Font = new Font("Segoe UI", 8) };
+        content.Controls.Add(hint);
     }
 
     private void ApplyAccent()
     {
-        accentColor = currentSettings.AccentPreset switch
+        accent = settings.AccentPreset switch
         {
-            "Blue" => Color.FromArgb(65, 145, 255),
-            "Red" => Color.FromArgb(235, 75, 95),
-            _ => Color.FromArgb(151, 93, 255)
+            "Blue" => Color.FromArgb(70, 145, 255),
+            "Red" => Color.FromArgb(238, 78, 100),
+            _ => Color.FromArgb(153, 104, 255)
         };
-    }
-
-    private void AddCard(string heading, string body, int x, int y)
-    {
-        var card = new Panel
-        {
-            Location = new Point(x, y),
-            Size = new Size(Math.Max(400, content.ClientSize.Width - 56), 94),
-            BackColor = PanelColor,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-        var title = new Label
-        {
-            Text = heading,
-            AutoSize = true,
-            ForeColor = accentColor,
-            Font = new Font("Segoe UI", 10, FontStyle.Bold),
-            Location = new Point(18, 14)
-        };
-        var detail = new Label
-        {
-            Text = body,
-            AutoSize = false,
-            ForeColor = Color.Gainsboro,
-            Location = new Point(18, 43),
-            Size = new Size(card.Width - 36, 38),
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-        card.Controls.Add(title);
-        card.Controls.Add(detail);
-        content.Controls.Add(card);
+        brand.ForeColor = accent;
     }
 }
