@@ -17,13 +17,32 @@ internal static class Program
 
         ApplicationConfiguration.Initialize();
 
+        if (!LicenseKeyService.IsActivated())
+        {
+            using var activation = new KeyActivationForm();
+            if (activation.ShowDialog() != DialogResult.OK)
+                return;
+        }
+
         if (!LicenseConsent.IsCurrentAccepted())
         {
             using var license = new LicenseForm();
             if (license.ShowDialog() != DialogResult.OK)
                 return;
 
-            LicenseConsent.RecordAcceptance();
+            try
+            {
+                LicenseConsent.RecordAcceptance();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                MessageBox.Show(
+                    "Не удалось сохранить принятие лицензии. Проверьте права доступа к папке профиля Windows.",
+                    "VHVLOSE",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
         }
 
         ClientSettings.ConfigureGameRoot(gameRoot);
